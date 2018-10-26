@@ -10,6 +10,8 @@ import javax.imageio.ImageIO;
 import org.apache.commons.math3.linear.OpenMapRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import util.MathNC;
+
 /**
  * Here is a Normalized Cuts implementation which can be used to perform the
  * algorithm on RGB images.
@@ -35,9 +37,11 @@ public class NormalizedCutsRGB extends NormalizedCuts {
 	 *            is the path to the grayscale image that we wish to perform
 	 *            NCuts on.
 	 */
-	public NormalizedCutsRGB(double sigmaI, double sigmaX, double r, double l, double nCutThreshold, int nCutType,
-			int nClusters, double accuracy, boolean useEigenvectors, String imgPath) {
-		super(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters, accuracy, useEigenvectors);
+	public NormalizedCutsRGB(double sigmaI, double sigmaX, double r, double l,
+			double nCutThreshold, int nCutType, int nClusters, double accuracy,
+			boolean useEigenvectors, String imgPath) {
+		super(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters,
+				accuracy, useEigenvectors);
 
 		// Read in the image.
 		try {
@@ -53,7 +57,8 @@ public class NormalizedCutsRGB extends NormalizedCuts {
 		setnPixels(getImgWidth() * getImgHeight());
 		setHasAlpha(this.img.getColorModel().hasAlpha());
 
-		this.pixels = img.getRGB(0, 0, getImgWidth(), getImgHeight(), null, 0, getImgWidth());
+		this.pixels = img.getRGB(0, 0, getImgWidth(), getImgHeight(), null, 0,
+				getImgWidth());
 
 		setSimilarityMatrix();
 	}
@@ -67,9 +72,11 @@ public class NormalizedCutsRGB extends NormalizedCuts {
 	 * @param img
 	 *            is the BufferedImage we perform Normalized Cuts on.
 	 */
-	public NormalizedCutsRGB(double sigmaI, double sigmaX, double r, double l, double nCutThreshold, int nCutType,
-			int nClusters, double accuracy, boolean useEigenvectors, BufferedImage img) {
-		super(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters, accuracy, useEigenvectors);
+	public NormalizedCutsRGB(double sigmaI, double sigmaX, double r, double l,
+			double nCutThreshold, int nCutType, int nClusters, double accuracy,
+			boolean useEigenvectors, BufferedImage img) {
+		super(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters,
+				accuracy, useEigenvectors);
 
 		this.img = img;
 
@@ -79,7 +86,8 @@ public class NormalizedCutsRGB extends NormalizedCuts {
 		setnPixels(getImgWidth() * getImgHeight());
 		setHasAlpha(this.img.getColorModel().hasAlpha());
 
-		pixels = img.getRGB(0, 0, getImgWidth(), getImgHeight(), null, 0, getImgWidth());
+		pixels = img.getRGB(0, 0, getImgWidth(), getImgHeight(), null, 0,
+				getImgWidth());
 
 		setSimilarityMatrix();
 	}
@@ -110,14 +118,16 @@ public class NormalizedCutsRGB extends NormalizedCuts {
 		Color c_j = new Color(j, this.hasAlpha);
 
 		double[] c_i_arr = (this.hasAlpha)
-				? new double[] { c_i.getRed(), c_i.getGreen(), c_i.getBlue(), c_i.getAlpha() }
+				? new double[] { c_i.getRed(), c_i.getGreen(), c_i.getBlue(),
+						c_i.getAlpha() }
 				: new double[] { c_i.getRed(), c_i.getGreen(), c_i.getBlue() };
 
 		double[] c_j_arr = (this.hasAlpha)
-				? new double[] { c_j.getRed(), c_j.getGreen(), c_j.getBlue(), c_j.getAlpha() }
+				? new double[] { c_j.getRed(), c_j.getGreen(), c_j.getBlue(),
+						c_j.getAlpha() }
 				: new double[] { c_j.getRed(), c_j.getGreen(), c_j.getBlue() };
 
-		return Math.exp(-l2NormDiff(c_i_arr, c_j_arr) / getSigmaI());
+		return Math.exp(-MathNC.l2NormDiff(c_i_arr, c_j_arr) / getSigmaI());
 	}
 
 	@Override
@@ -131,10 +141,13 @@ public class NormalizedCutsRGB extends NormalizedCuts {
 		int j_y = j / getImgWidth();
 
 		// Work out the spatial value X(i) - X(j).
-		double spatialDistance = getSpatialWeight(new double[] { i_x, i_y }, new double[] { j_x, j_y });
+		double spatialDistance = getSpatialWeight(new double[] { i_x, i_y },
+				new double[] { j_x, j_y });
 
 		return (spatialDistance < getR())
-				? getFeatureFactor(getPixels()[i], getPixels()[j]) * getSpatialFactor(spatialDistance) : 0;
+				? getFeatureFactor(getPixels()[i], getPixels()[j])
+						* getSpatialFactor(spatialDistance)
+				: 0;
 	}
 
 	public BufferedImage getImg() {
@@ -174,8 +187,9 @@ public class NormalizedCutsRGB extends NormalizedCuts {
 
 		// Big image to test on
 		String imgPath = "images/color_50x50.png";
-		NormalizedCutsRGB ncrgb = new NormalizedCutsRGB(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters,
-				accuracy, useEigenvectors, imgPath);
+		NormalizedCutsRGB ncrgb = new NormalizedCutsRGB(sigmaI, sigmaX, r, l,
+				nCutThreshold, nCutType, nClusters, accuracy, useEigenvectors,
+				imgPath);
 		show(ncrgb.getImg(), 500, 500);
 		ncrgb.clusterAndSetW();
 

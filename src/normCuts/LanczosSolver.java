@@ -12,6 +12,8 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 
+import util.MathNC;
+
 /**
  * Logic behind the Lanczos Algorithm for finding the k most useful extreme
  * eigenvectors of a Hermittian Matrix.
@@ -253,7 +255,7 @@ public class LanczosSolver {
 	 * @return the unit vector.
 	 */
 	public double[] toUnitVector(double[] vec) {
-		double euc_dist = NormalizedCuts.l2Norm(vec);
+		double euc_dist = MathNC.l2Norm(vec);
 		for (int i = 0; i < vec.length; i++)
 			vec[i] /= euc_dist;
 		return vec;

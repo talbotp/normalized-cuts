@@ -19,7 +19,7 @@ import normCuts.LanczosSolver.EigenValueVectorPair;
 /**
  * Unit test cases for class src.normCuts.LanczosSolver
  * 
- * @author Andrew P Talbot
+ * @author P Talbot
  */
 public class LanczosSolverTest {
 

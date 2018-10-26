@@ -20,6 +20,7 @@ import org.apache.commons.math3.linear.OpenMapRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import normCuts.LanczosSolver.EigenValueVectorPair;
+import util.MathNC;
 
 /**
  * Class which defines all generic methods to be used for any Normalized Cuts
@@ -39,7 +40,7 @@ public abstract class NormalizedCuts {
 
 	// Fields specific to the image.
 	private int imgWidth, imgHeight, nPixels, nCutType, nClusters;
-	
+
 	private boolean useEigenvectors;
 	private double accuracy;
 
@@ -78,8 +79,9 @@ public abstract class NormalizedCuts {
 	 *            is the number of clusters, is only used when the nCutType is
 	 *            ZERO or MEDIAN.
 	 */
-	public NormalizedCuts(double sigmaI, double sigmaX, double r, double l, double nCutThreshold, int nCutType,
-			int nClusters, double accuracy, boolean useEigenvectors) {
+	public NormalizedCuts(double sigmaI, double sigmaX, double r, double l,
+			double nCutThreshold, int nCutType, int nClusters, double accuracy,
+			boolean useEigenvectors) {
 		setSigmaI(sigmaI);
 		setSigmaX(sigmaX);
 		setR(r);
@@ -206,10 +208,11 @@ public abstract class NormalizedCuts {
 			RealMatrix D_1_2 = getD_minus_1_2(D);
 			RealMatrix toEig = getMatrixToEigenDecompose(D, D_1_2, leaf.W);
 
-			// IF too big then we use Lanczos. - CHANGE TO TRUE. TODO : CHANGE
 			int val = 30;
-			boolean lessThanVal = (leaf.W.getColumnDimension() < val) ? true : false;
-			double[] eigvec2 = getSecondEigenvector(toEig, lessThanVal, this.getAccuracy(), this.getUseEigenvectors());
+			boolean lessThanVal = (leaf.W.getColumnDimension() < val) ? true
+					: false;
+			double[] eigvec2 = getSecondEigenvector(toEig, lessThanVal,
+					this.getAccuracy(), this.getUseEigenvectors());
 
 			double splitter = getSplitter(eigvec2, leaf.W);
 			System.out.println("splitter = " + splitter);
@@ -220,7 +223,8 @@ public abstract class NormalizedCuts {
 
 			// Invalid splitter value
 			System.out.println(splitter > this.nCutThreshold);
-			if (this.nCutType == PARTITION_BY_NCUT && splitter > this.nCutThreshold) {
+			if (this.nCutType == PARTITION_BY_NCUT
+					&& splitter > this.nCutThreshold) {
 				System.out.println("End the ncuts partition");
 				continue;
 			}
@@ -243,7 +247,8 @@ public abstract class NormalizedCuts {
 
 				// We only do this if type is ncut and (the type is not ncut and
 				// the number of clusters is less than the max n clusters.)
-				if ((getNCutType() != PARTITION_BY_NCUT && getCurrentNClusters() < getNClusters())
+				if ((getNCutType() != PARTITION_BY_NCUT
+						&& getCurrentNClusters() < getNClusters())
 						|| getNCutType() == PARTITION_BY_NCUT) {
 
 					int sizeP1 = 0;
@@ -252,11 +257,13 @@ public abstract class NormalizedCuts {
 					int counter = 0;
 					for (Integer i : keySet) {
 						if (eigvec2[counter] < splitter) {
-							clusters[leaf.partition.get(i)] = this.tmpNClusters + 1;
+							clusters[leaf.partition.get(i)] = this.tmpNClusters
+									+ 1;
 							p1.put(sizeP1, leaf.partition.get(i));
 							sizeP1++;
 						} else {
-							clusters[leaf.partition.get(i)] = this.tmpNClusters + 2;
+							clusters[leaf.partition.get(i)] = this.tmpNClusters
+									+ 2;
 							p2.put(sizeP2, leaf.partition.get(i));
 							sizeP2++;
 						}
@@ -268,7 +275,7 @@ public abstract class NormalizedCuts {
 					this.tmpNClusters += 2;
 
 				} else {
-					// TODO : ISSUE HERE
+					
 					break;
 				}
 			}
@@ -292,9 +299,11 @@ public abstract class NormalizedCuts {
 					return;
 				} else {
 					if (p1.size() != 0)
-						bipartitions.add(new BiPartition(getNewW(leaf.W, p1), p1));
+						bipartitions
+								.add(new BiPartition(getNewW(leaf.W, p1), p1));
 					if (p2.size() != 0)
-						bipartitions.add(new BiPartition(getNewW(leaf.W, p2), p2));
+						bipartitions
+								.add(new BiPartition(getNewW(leaf.W, p2), p2));
 				}
 			}
 		}
@@ -323,12 +332,13 @@ public abstract class NormalizedCuts {
 		case PARTITION_BY_ZERO:
 			return 0;
 		case PARTITION_BY_MEDIAN:
-			return getMedian(eigvec2);
+			return MathNC.getMedian(eigvec2);
 		case PARTITION_BY_NCUT:
 			return getBestCut(eigvec2, getL(), W);
 		default:
 			// This should NEVER happen.
-			throw new IllegalStateException("An invalid partitioning method is being used.");
+			throw new IllegalStateException(
+					"An invalid partitioning method is being used.");
 		}
 	}
 
@@ -377,7 +387,8 @@ public abstract class NormalizedCuts {
 					p2.add(i);
 			}
 
-			double cutVal = NCut(p1.toArray(new Integer[0]), p2.toArray(new Integer[0]), W);
+			double cutVal = NCut(p1.toArray(new Integer[0]),
+					p2.toArray(new Integer[0]), W);
 			nCutValues.add(cutVal);
 
 			/*
@@ -406,7 +417,8 @@ public abstract class NormalizedCuts {
 	 *            is the values in the new partition.
 	 * @return the new similarity matrix.
 	 */
-	public static RealMatrix getNewW(RealMatrix W, Map<Integer, Integer> partition) {
+	public static RealMatrix getNewW(RealMatrix W,
+			Map<Integer, Integer> partition) {
 		Integer[] p = partition.keySet().toArray(new Integer[0]);
 		int sizeW = p.length;
 
@@ -455,7 +467,7 @@ public abstract class NormalizedCuts {
 	 * @return the euclidean distance between these two arrays.
 	 */
 	public static double getSpatialWeight(double[] i, double[] j) {
-		return l2NormDiff(i, j);
+		return MathNC.l2NormDiff(i, j);
 	}
 
 	/**
@@ -490,10 +502,12 @@ public abstract class NormalizedCuts {
 	 *            efficiently, still need to figure this out.
 	 * @return the eigenvector corresponding to the second smallest eigenvalue.
 	 */
-	public static double[] getSecondEigenvector(RealMatrix X, boolean trivialMethod, double accuracy, boolean useEigenvectors) {
+	public static double[] getSecondEigenvector(RealMatrix X,
+			boolean trivialMethod, double accuracy, boolean useEigenvectors) {
 
 		if (trivialMethod) {
-			// Use library to calculate all eigenvectors, get the second.
+			// Use library to calculate all eigenvectors, get the second, using
+			// LU Decomposition.
 			EigenDecomposition eigDec = new EigenDecomposition(X);
 			double[] eigenvalues = eigDec.getRealEigenvalues();
 
@@ -511,47 +525,15 @@ public abstract class NormalizedCuts {
 			// Here are the Lanczos variables, perhaps these should be static
 			// variables at the top of this class?
 			int eigIndex = 1;
-			int m = X.getColumnDimension(); // TODO : CHANGE THIS TO ALTER THE
-											// ACCURACY OF THE APPROXIMATION.
+			int m = X.getColumnDimension();
 
-			LanczosSolver ls = new LanczosSolver(X, eigIndex, m, useEigenvectors, accuracy);
+			LanczosSolver ls = new LanczosSolver(X, eigIndex, m,
+					useEigenvectors, accuracy);
 			EigenValueVectorPair evp = ls.solve();
 			System.out.println(evp.eigenvalue);
 
 			return evp.eigenvector;
 		}
-	}
-
-	/**
-	 * Method to check if a matrix is symmetric.
-	 * 
-	 * We use this as a asanity check that the matrix we are checking is in fact
-	 * symmetric, otherwise Lanczos will simply fail.
-	 * 
-	 * @param X
-	 *            is the matrix we check if is symmetric.
-	 * @param accuracy
-	 *            is the maximum difference between values for the matrix to be
-	 *            considered symmetric, we do this if we wish to account for
-	 *            rounding errors.
-	 * @return true if the matrix is symmetric, false otherwise.
-	 */
-	public static boolean isSymmetric(RealMatrix X, double accuracy) {
-
-		// Case when matrix is not square it cannot be symmetric.
-		if (X.getColumnDimension() != X.getRowDimension()) {
-			System.out.println("unequal size row and columns, not symmetric");
-			return false;
-		}
-
-		// Work through the upper triangle of the matrix.
-		for (int i = 0; i < X.getColumnDimension(); i++) {
-			for (int j = i; j < X.getRowDimension(); j++) {
-				if (Math.abs(X.getEntry(i, j) - X.getEntry(j, i)) > accuracy)
-					return false;
-			}
-		}
-		return true;
 	}
 
 	/**
@@ -569,7 +551,8 @@ public abstract class NormalizedCuts {
 	 * @param W
 	 *            is the original weights matrix W.
 	 */
-	public static RealMatrix getMatrixToEigenDecompose(RealMatrix D, RealMatrix D_1_2, RealMatrix W) {
+	public static RealMatrix getMatrixToEigenDecompose(RealMatrix D,
+			RealMatrix D_1_2, RealMatrix W) {
 
 		RealMatrix X = D.subtract(W);
 
@@ -594,7 +577,7 @@ public abstract class NormalizedCuts {
 		RealMatrix D = new OpenMapRealMatrix(nPixels, nPixels);
 
 		for (int i = 0; i < nPixels; i++) {
-			D.setEntry(i, i, sumRow(W, i));
+			D.setEntry(i, i, MathNC.sumRow(W, i));
 		}
 
 		return D;
@@ -637,7 +620,8 @@ public abstract class NormalizedCuts {
 	 * SEE DOCS for NCut().
 	 */
 	public static double Nassoc(Integer[] p1, Integer[] p2, RealMatrix W) {
-		return assoc(p1, false, W) / assoc(p1, true, W) + assoc(p2, false, W) / assoc(p2, true, W);
+		return assoc(p1, false, W) / assoc(p1, true, W)
+				+ assoc(p2, false, W) / assoc(p2, true, W);
 	}
 
 	/**
@@ -677,38 +661,6 @@ public abstract class NormalizedCuts {
 	/*********************************************************************/
 
 	/**
-	 * Add the values of a column of a RealMatrix.
-	 * 
-	 * @param A
-	 *            is the matrix we add the values in column col of.
-	 * @param col
-	 *            is the column of A we wish to sum.
-	 * @return the sum of the values in column col of matrix A.
-	 */
-	public static double sumColumn(RealMatrix A, int col) {
-		double sumCol = 0;
-		for (int i = 0; i < A.getRowDimension(); i++)
-			sumCol += A.getEntry(i, col);
-		return sumCol;
-	}
-
-	/**
-	 * Add the values of a row of a RealMatrix.
-	 * 
-	 * @param A
-	 *            is the matrix we add the values in row col of.
-	 * @param row
-	 *            is the row of A we wish to sum.
-	 * @return the sum of the values in column row of matrix A.
-	 */
-	public static double sumRow(RealMatrix A, int row) {
-		double sumRow = 0;
-		for (int i = 0; i < A.getColumnDimension(); i++)
-			sumRow += A.getEntry(row, i);
-		return sumRow;
-	}
-
-	/**
 	 * Method to visualize a BufferedImage.
 	 */
 	public static void show(BufferedImage img) {
@@ -724,8 +676,10 @@ public abstract class NormalizedCuts {
 	 * Method to visualize a resized BufferedImage.
 	 */
 	public static void show(BufferedImage img, int newWidth, int newHeight) {
-		Image tmp = img.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
-		BufferedImage dimg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+		Image tmp = img.getScaledInstance(newWidth, newHeight,
+				Image.SCALE_SMOOTH);
+		BufferedImage dimg = new BufferedImage(newWidth, newHeight,
+				BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2d = dimg.createGraphics();
 		g2d.drawImage(tmp, 0, 0, null);
 		g2d.dispose();
@@ -746,7 +700,8 @@ public abstract class NormalizedCuts {
 	 *            is the pixel array to visualize.
 	 */
 	public void show(int[] pixels) {
-		BufferedImage img = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage img = new BufferedImage(imgWidth, imgHeight,
+				BufferedImage.TYPE_BYTE_GRAY);
 		for (int i = 0; i < imgWidth; i++) {
 			for (int j = 0; j < imgHeight; j++) {
 				img.setRGB(i, j, pixels[i * imgWidth + j]);
@@ -760,10 +715,13 @@ public abstract class NormalizedCuts {
 	 * 500x500 pixels frame.
 	 */
 	public void displayClusters() {
-		BufferedImage tmp_img = new BufferedImage(getImgWidth(), getImgHeight(), BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage tmp_img = new BufferedImage(getImgWidth(), getImgHeight(),
+				BufferedImage.TYPE_BYTE_GRAY);
 
-		setImgPixelsGrayscale(tmp_img, getClusterPixel(getclusters(true), getCurrentNClusters()));
-		System.out.println("Now we show the new image with " + getCurrentNClusters() + " clusters.");
+		setImgPixelsGrayscale(tmp_img,
+				getClusterPixel(getclusters(true), getCurrentNClusters()));
+		System.out.println("Now we show the new image with "
+				+ getCurrentNClusters() + " clusters.");
 		System.out.println("But there are " + this.getNClusters() + "clusters");
 		show(tmp_img, 300, 300);
 	}
@@ -777,7 +735,8 @@ public abstract class NormalizedCuts {
 	 * @param pixels
 	 *            is the new RGB values.
 	 */
-	public static BufferedImage setImgPixelsGrayscale(BufferedImage img, int[] pixels) {
+	public static BufferedImage setImgPixelsGrayscale(BufferedImage img,
+			int[] pixels) {
 		for (int i = 0; i < pixels.length; i++)
 			img.getRaster().getDataBuffer().setElem(i, pixels[i] - 128);
 		return img;
@@ -812,7 +771,8 @@ public abstract class NormalizedCuts {
 	 * @return the grayscale BufferedImage version of biColor.
 	 */
 	public static BufferedImage convertToGrayBI(BufferedImage biColor) {
-		BufferedImage biGray = new BufferedImage(biColor.getWidth(), biColor.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage biGray = new BufferedImage(biColor.getWidth(),
+				biColor.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 		biGray.getGraphics().drawImage(biColor, 0, 0, null);
 		return biGray;
 	}
@@ -832,41 +792,6 @@ public abstract class NormalizedCuts {
 		return arr;
 	}
 
-	// TODO : REPLACE WITH MATHMSK VERSION.
-	public static double l2Norm(double[] spec) {
-
-		if (spec.length < 1)
-			throw new IllegalArgumentException("The array requires a length of at least 1.");
-
-		double sum = 0;
-		for (double val : spec) {
-			sum += Math.pow(Math.abs(val), 2);
-		}
-		return Math.sqrt(sum);
-	}
-
-	// TODO : REPLACE WITH MATHMSK VERSION.
-	public static double l2NormDiff(double[] spec1, double[] spec2) {
-		int length = spec1.length;
-		double[] arr = new double[spec1.length];
-		for (int i = 0; i < length; ++i) {
-			arr[i] = spec1[i] - spec2[i];
-		}
-		return l2Norm(arr);
-	}
-
-	// TODO: Replace with MathMSK.median().
-	public static double getMedian(double[] arr) {
-		double[] tmp = arr.clone();
-		Arrays.sort(tmp);
-		double median;
-		if (tmp.length % 2 == 0)
-			median = ((double) tmp[tmp.length / 2] + (double) tmp[tmp.length / 2 - 1]) / 2;
-		else
-			median = (double) tmp[tmp.length / 2];
-		return median;
-	}
-
 	/*********************************************************************/
 	/* Here are getters and setters. */
 	/*********************************************************************/
@@ -879,7 +804,8 @@ public abstract class NormalizedCuts {
 		if (sigmaI > 0)
 			this.sigmaI = sigmaI;// Math.pow(sigmaI, 2);
 		else
-			throw new IllegalArgumentException("Please use a positive value of sigmaI.");
+			throw new IllegalArgumentException(
+					"Please use a positive value of sigmaI.");
 	}
 
 	public double getSigmaX() {
@@ -890,7 +816,8 @@ public abstract class NormalizedCuts {
 		if (sigmaX > 0)
 			this.sigmaX = sigmaX;// Math.pow(sigmaX, 2);
 		else
-			throw new IllegalArgumentException("Please use a positive value of sigmaX.");
+			throw new IllegalArgumentException(
+					"Please use a positive value of sigmaX.");
 	}
 
 	public double getR() {
@@ -901,7 +828,8 @@ public abstract class NormalizedCuts {
 		if (r > 0)
 			this.r = r;
 		else
-			throw new IllegalArgumentException("Please use a positive value of r.");
+			throw new IllegalArgumentException(
+					"Please use a positive value of r.");
 	}
 
 	public double getNCutThreshold() {
@@ -912,7 +840,8 @@ public abstract class NormalizedCuts {
 		if (nCutThreshold > 0)
 			this.nCutThreshold = nCutThreshold;
 		else
-			throw new IllegalArgumentException("Please use a positive value of the N Cut threshold.");
+			throw new IllegalArgumentException(
+					"Please use a positive value of the N Cut threshold.");
 	}
 
 	public int getImgWidth() {
@@ -955,7 +884,8 @@ public abstract class NormalizedCuts {
 		if (l2 >= 0)
 			this.l = l2;
 		else
-			throw new IllegalArgumentException("Please ensure that l is non-negative.");
+			throw new IllegalArgumentException(
+					"Please ensure that l is non-negative.");
 	}
 
 	public int getNCutType() {
@@ -963,10 +893,12 @@ public abstract class NormalizedCuts {
 	}
 
 	public void setNCutType(final int TYPE) {
-		if (TYPE == PARTITION_BY_ZERO || TYPE == PARTITION_BY_MEDIAN || TYPE == PARTITION_BY_NCUT)
+		if (TYPE == PARTITION_BY_ZERO || TYPE == PARTITION_BY_MEDIAN
+				|| TYPE == PARTITION_BY_NCUT)
 			nCutType = TYPE;
 		else
-			throw new IllegalArgumentException("Please choose a valid method of partitioning the graph.");
+			throw new IllegalArgumentException(
+					"Please choose a valid method of partitioning the graph.");
 	}
 
 	/**
@@ -1007,7 +939,8 @@ public abstract class NormalizedCuts {
 		if (nClusters > 0)
 			this.nClusters = nClusters;
 		else
-			throw new IllegalArgumentException("Please ensure the number of clusters is greater than 0.");
+			throw new IllegalArgumentException(
+					"Please ensure the number of clusters is greater than 0.");
 	}
 
 	public BufferedImage getImg() {
@@ -1021,18 +954,19 @@ public abstract class NormalizedCuts {
 	public double getAccuracy() {
 		return accuracy;
 	}
-	
+
 	public void setAccuracy(double accuracy) {
 		if (accuracy < 0)
-			throw new IllegalArgumentException("That is an invalid value of the accuracy.");
+			throw new IllegalArgumentException(
+					"That is an invalid value of the accuracy.");
 		else
 			this.accuracy = accuracy;
 	}
-	
+
 	public boolean getUseEigenvectors() {
 		return useEigenvectors;
 	}
-	
+
 	public void setUseEigenvectors(boolean toUseEigenvectors) {
 		this.useEigenvectors = toUseEigenvectors;
 	}

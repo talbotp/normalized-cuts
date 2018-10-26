@@ -33,9 +33,11 @@ public class NormalizedCutsGray extends NormalizedCuts {
 	 *            is the path to the grayscale image that we wish to perform
 	 *            NCuts on.
 	 */
-	public NormalizedCutsGray(double sigmaI, double sigmaX, double r, double l, double nCutThreshold, int nCutType,
-			int nClusters, double accuracy, boolean useEigenvectors, String imgPath) {
-		super(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters, accuracy, useEigenvectors);
+	public NormalizedCutsGray(double sigmaI, double sigmaX, double r, double l,
+			double nCutThreshold, int nCutType, int nClusters, double accuracy,
+			boolean useEigenvectors, String imgPath) {
+		super(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters,
+				accuracy, useEigenvectors);
 
 		// Read in the image.
 		try {
@@ -52,7 +54,8 @@ public class NormalizedCutsGray extends NormalizedCuts {
 		setImgWidth(img.getWidth());
 		setImgHeight(img.getHeight());
 		setnPixels(getImgWidth() * getImgHeight());
-		pixels = convertToIntArray(((DataBufferByte) img.getRaster().getDataBuffer()).getData());
+		pixels = convertToIntArray(
+				((DataBufferByte) img.getRaster().getDataBuffer()).getData());
 
 		setSimilarityMatrix();
 
@@ -69,9 +72,11 @@ public class NormalizedCutsGray extends NormalizedCuts {
 	 * @param img
 	 *            is the BufferedImage we perform Normalized Cuts on.
 	 */
-	public NormalizedCutsGray(double sigmaI, double sigmaX, double r, double l, double nCutThreshold, int nCutType,
-			int nClusters, double accuracy, boolean useEigenvectors, BufferedImage img) {
-		super(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters, accuracy, useEigenvectors);
+	public NormalizedCutsGray(double sigmaI, double sigmaX, double r, double l,
+			double nCutThreshold, int nCutType, int nClusters, double accuracy,
+			boolean useEigenvectors, BufferedImage img) {
+		super(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters,
+				accuracy, useEigenvectors);
 
 		// Convert to grayscale image.
 		this.img = convertToGrayBI(img);
@@ -81,7 +86,8 @@ public class NormalizedCutsGray extends NormalizedCuts {
 		setImgHeight(this.img.getHeight());
 		setnPixels(getImgWidth() * getImgHeight());
 
-		pixels = convertToIntArray(((DataBufferByte) img.getRaster().getDataBuffer()).getData());
+		pixels = convertToIntArray(
+				((DataBufferByte) img.getRaster().getDataBuffer()).getData());
 
 		System.out.println("We print the original pixel array below.");
 		System.out.println(Arrays.toString(pixels));
@@ -107,15 +113,15 @@ public class NormalizedCutsGray extends NormalizedCuts {
 		int nPixels = getnPixels();
 
 		RealMatrix W = new OpenMapRealMatrix(nPixels, nPixels);
-		
+
 		// Loop through the array to set the symmetric matrix W.
 		for (int i = 0; i < nPixels; i++)
 			for (int j = i; j < nPixels; j++) {
-				
+
 				double w = getWeight(i, j);
 				W.setEntry(i, j, w);
 				W.setEntry(j, i, w);
-				
+
 			}
 
 		setW(W);
@@ -144,10 +150,13 @@ public class NormalizedCutsGray extends NormalizedCuts {
 		int j_y = j / getImgWidth();
 
 		// Work out the spatial value X(i) - X(j).
-		double spatialDistance = getSpatialWeight(new double[] { i_x, i_y }, new double[] { j_x, j_y });
+		double spatialDistance = getSpatialWeight(new double[] { i_x, i_y },
+				new double[] { j_x, j_y });
 
 		return (spatialDistance < getR())
-				? getFeatureFactor(getPixels()[i], getPixels()[j]) * getSpatialFactor(spatialDistance) : 0;
+				? getFeatureFactor(getPixels()[i], getPixels()[j])
+						* getSpatialFactor(spatialDistance)
+				: 0;
 	}
 
 	public BufferedImage getImg() {
@@ -168,7 +177,7 @@ public class NormalizedCutsGray extends NormalizedCuts {
 
 	public static void main(String[] args) {
 		System.out.println("BEGIN");
-		
+
 		double sigmaI = 15;
 		double sigmaX = 16;
 		double r = 2.2;
@@ -184,12 +193,14 @@ public class NormalizedCutsGray extends NormalizedCuts {
 
 		// Small image to test on.
 		int[] pixels = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-		BufferedImage img = new BufferedImage(3, 3, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage img = new BufferedImage(3, 3,
+				BufferedImage.TYPE_BYTE_GRAY);
 		for (int i = 0; i < pixels.length; i++)
 			img.getRaster().getDataBuffer().setElem(i, pixels[i]);
 
-		NormalizedCutsGray nc = new NormalizedCutsGray(sigmaI, sigmaX, r, l, nCutThreshold, nCutType, nClusters,
-				accuracy, useEigenvectors, imgPath);
+		NormalizedCutsGray nc = new NormalizedCutsGray(sigmaI, sigmaX, r, l,
+				nCutThreshold, nCutType, nClusters, accuracy, useEigenvectors,
+				imgPath);
 		show(nc.getImg(), 300, 300);
 
 		nc.clusterAndSetW();
