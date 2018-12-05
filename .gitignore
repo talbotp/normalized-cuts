@@ -1,6 +1,13 @@
+# .class files
 bin/*
+
+# Eclipse files
 .project
 .settings
 .classpath
+
+# Libraries used.
 lib/*
+
+# Mac specific file.
 .DS_Store
