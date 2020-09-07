@@ -1,5 +1,8 @@
 # normalized-cuts
 
+## Rework
+This is being reworked [here][https://github.com/talbotp/normcuts], to try and get better memory management, so it can be ran on larger images.
+
 Here is a java implementation of the Normalized Cuts image segmentation algorithm as proposed in this [paper](https://people.eecs.berkeley.edu/~malik/papers/SM-ncut.pdf) by Jianbo Shi and Jitendra Malik. This is a recursive spatial clustering algorithm, which takes influence from spectral clustering.
 
 ## Structure
